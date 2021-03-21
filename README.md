@@ -3,7 +3,7 @@ How to build Spresense SDK with clang.
 
 :warning:
 This page is not still complete.  
-I can not run nuttx on spresense.  
+I had only tried run hello world example.  
 So this page say that I tried to build with clang.  
 I think that It may help someone to try build nuttx with clang.  
 Please some advice if you find something wrong.
@@ -168,7 +168,7 @@ I had modified [sdk/configs/default/defconfig](https://github.com/sonydevworld/s
 
 ```diff
 diff --git a/sdk/configs/default/defconfig b/sdk/configs/default/defconfig
-index 370158b7..ebb2316b 100644
+index 370158b7..0b438dc3 100644
 --- a/sdk/configs/default/defconfig
 +++ b/sdk/configs/default/defconfig
 @@ -20,7 +20,7 @@ CONFIG_ARCH_BOARD_SPRESENSE=y
@@ -190,6 +190,15 @@ index 370158b7..ebb2316b 100644
  CONFIG_LIBC_IPv4_ADDRCONV=y
  CONFIG_LIBC_IPv6_ADDRCONV=y
  CONFIG_LIB_KBDCODEC=y
+@@ -134,7 +135,7 @@ CONFIG_START_MONTH=12
+ CONFIG_START_YEAR=2011
+ CONFIG_SYSTEM_CLE=y
+ CONFIG_SYSTEM_NSH=y
+-CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
++#CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
+ CONFIG_UART1_RXBUFSIZE=1024
+ CONFIG_UART1_SERIAL_CONSOLE=y
+ CONFIG_UART1_TXBUFSIZE=1024
 @@ -151,3 +152,239 @@ CONFIG_USBMSC_VENDORID=0x054c
  CONFIG_USBMSC_VENDORSTR="Sony"
  CONFIG_USERMAIN_STACKSIZE=8192
@@ -516,42 +525,24 @@ updater# Restarting the board ...
 reboot
 ```
 
-# Hard Fault
+# Run Hello world
 
-In the current situation, a hardware fault occurs as shown below.
+Run Hello world on nsh.
 
 ```
-up_hardfault: Hard Fault:
-up_hardfault:   IRQ: 3 regs: 0xd03686c
-up_hardfault:   BASEPRI: 000000e0 PRIMASK: 00000000 IPSR: 00000003 CONTROL: 00000000
-up_hardfault:   CFAULTS: 00020000 HFAULTS: 40000000 DFAULTS: 00000000 BFAULTADDR: e000ed38 AFAULTS: 00000000
-up_hardfault: PANIC!!! Hard fault: 40000000
-up_assert: Assertion failed at file:armv7-m/up_hardfault.c line: 148 task: init
-up_registerdump: R0: 0d023c04 0d03695c 0d00f005 00000101 0d026870 0d000000 0d02685c 0d02685c
-up_registerdump: R8: 00000000 00000000 00000000 00000000 0d0343e0 0d036940 0d01e775 0d023c04
-up_registerdump: xPSR: 80000000 BASEPRI: 000000e0 CONTROL: 00000000
-up_registerdump: EXC_RETURN: ffffffe9
-up_dumpstate: sp:     0d0282b0
-up_dumpstate: IRQ stack:
-up_dumpstate:   base: 0d028300
-up_dumpstate:   size: 00000800
-up_dumpstate:   used: 000000e0
-up_stackdump: 0d0282a0: 0d0282b0 0d02311e 0d0343e0 0d0017a1 000000e0 00000000 00000000 0d0343e0
-up_stackdump: 0d0282c0: 0d036940 0d01e775 0d023c04 00000094 40000000 00000000 e000ed38 00000000
-up_stackdump: 0d0282e0: 00000000 0d00450d deadbeef 0d03686c 0d000000 0d02685c 0d02685c 0d00449f
-up_dumpstate: sp:     0d036940
-up_dumpstate: User stack:
-up_dumpstate:   base: 0d036968
-up_dumpstate:   size: 00001fec
-up_dumpstate:   used: 00000100
-up_stackdump: 0d036940: 00000000 00000000 00000000 00000000 00000000 0d00f02b 00000000 00000064
-up_stackdump: 0d036960: 00000000 0d0032a1 deadbeef 0d036974 00000000 74696e69 deadbe00 8c574e5e
-up_taskdump: Idle Task: PID=0 Stack Used=0 of 0
-up_taskdump: hpwork: PID=1 Stack Used=304 of 2028
-up_taskdump: lpwork: PID=2 Stack Used=304 of 2028
-up_taskdump: lpwork: PID=3 Stack Used=304 of 2028
-up_taskdump: lpwork: PID=4 Stack Used=304 of 2028
-up_taskdump: cxd56_pm_task: PID=6 Stack Used=328 of 996
-up_taskdump: init: PID=7 Stack Used=256 of 8172
+nx_start: up_initialize start
+up_initialize: syslog_initialize start
+up_initialize: syslog_initialize end
+up_initialize: up_initialize end
+nx_start: up_initialize end
+nx_start: CPU0: Beginning Idle Loop
+nsh_main: main start
+nsh_task: nsh_task start
+nsh_task: nsh_task end
+
+NuttShell (NSH) NuttX-8.2
+nsh> hello
+Hello, World!!
+nsh> 
 ```
 

@@ -17,6 +17,27 @@ index f658f371c0..cdd5369b75 100644
  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
  	$(Q) $(NM) $(NUTTX) | \
  	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+diff --git a/nuttx/arch/arm/src/common/up_initialize.c b/nuttx/arch/arm/src/common/up_initialize.c
+index 14a287a5ed..e97d384d1e 100644
+--- a/nuttx/arch/arm/src/common/up_initialize.c
++++ b/nuttx/arch/arm/src/common/up_initialize.c
+@@ -228,8 +228,9 @@ void up_initialize(void)
+    * can be initialized early in the initialization sequence because they
+    * depend on only minimal OS initialization.
+    */
+-
++  _alert("syslog_initialize start\n");
+   syslog_initialize(SYSLOG_INIT_EARLY);
++  _alert("syslog_initialize end\n");
+ 
+ #if defined(CONFIG_CRYPTO)
+   /* Initialize the HW crypto and /dev/crypto */
+@@ -275,4 +276,5 @@ void up_initialize(void)
+ 
+   up_l2ccinitialize();
+   board_autoled_on(LED_IRQSENABLED);
++  _alert("up_initialize end\n");
+ }
 diff --git a/nuttx/boards/arm/cxd56xx/spresense/scripts/ramconfig.ld b/nuttx/boards/arm/cxd56xx/spresense/scripts/ramconfig.ld
 index e43b556e5b..f532e58a27 100644
 --- a/nuttx/boards/arm/cxd56xx/spresense/scripts/ramconfig.ld
@@ -31,8 +52,68 @@ index e43b556e5b..f532e58a27 100644
  
      ASSERT(_ebss < __stack, "Error: Out of memory")
  
+diff --git a/nuttx/sched/init/nx_start.c b/nuttx/sched/init/nx_start.c
+index 9d4d35ec08..66ebdd6e32 100644
+--- a/nuttx/sched/init/nx_start.c
++++ b/nuttx/sched/init/nx_start.c
+@@ -713,9 +713,9 @@ void nx_start(void)
+    * service routines and starting the clock are some of the things
+    * that are different for each  processor and hardware platform.
+    */
+-
++  _alert("up_initialize start\n");
+   up_initialize();
+-
++  _alert("up_initialize end\n");
+ #ifdef CONFIG_BOARD_EARLY_INITIALIZE
+   /* Call the board-specific up_initialize() extension to support
+    * early initialization of board-specific drivers and resources
+@@ -839,7 +839,7 @@ void nx_start(void)
+   /* The IDLE Loop **********************************************************/
+ 
+   /* When control is return to this point, the system is idle. */
+-
++  _alert("CPU0: Beginning Idle Loop\n");
+   sinfo("CPU0: Beginning Idle Loop\n");
+   for (; ; )
+     {
+Submodule sdk/apps contains modified content
+diff --git a/sdk/apps/system/nsh/nsh_main.c b/sdk/apps/system/nsh/nsh_main.c
+index 047b91db..8d293d3e 100644
+--- a/sdk/apps/system/nsh/nsh_main.c
++++ b/sdk/apps/system/nsh/nsh_main.c
+@@ -192,7 +192,9 @@ static int nsh_task(void)
+ #if defined(CONFIG_SYSTEM_NSH_CXXINITIALIZE)
+   /* Call all C++ static constructors */
+ 
++  _alert("up_cxxinitialize start\n");
+   up_cxxinitialize();
++  _alert("up_cxxinitialize start\n");
+ #endif
+ 
+ #if defined(HAVE_DUMMY_SYMTAB) || defined (CONFIG_SYSTEM_NSH_SYMTAB)
+@@ -211,8 +213,9 @@ static int nsh_task(void)
+ #endif
+ 
+   /* Initialize the NSH library */
+-
++  _alert("nsh_task start\n");
+   nsh_initialize();
++  _alert("nsh_task end\n");
+ 
+ #if defined(CONFIG_NSH_TELNET) && !defined(CONFIG_NETINIT_NETLOCAL)
+   /* If the Telnet console is selected as a front-end, then start the
+@@ -263,7 +266,7 @@ int main(int argc, FAR char *argv[])
+   struct sched_param param;
+ 
+   /* Check the task priority that we were started with */
+-
++  _alert("main start\n");
+   (void)sched_getparam(0, &param);
+   if (param.sched_priority != CONFIG_SYSTEM_NSH_PRIORITY)
+     {
 diff --git a/sdk/configs/default/defconfig b/sdk/configs/default/defconfig
-index 370158b7..ebb2316b 100644
+index 370158b7..0b438dc3 100644
 --- a/sdk/configs/default/defconfig
 +++ b/sdk/configs/default/defconfig
 @@ -20,7 +20,7 @@ CONFIG_ARCH_BOARD_SPRESENSE=y
@@ -54,6 +135,15 @@ index 370158b7..ebb2316b 100644
  CONFIG_LIBC_IPv4_ADDRCONV=y
  CONFIG_LIBC_IPv6_ADDRCONV=y
  CONFIG_LIB_KBDCODEC=y
+@@ -134,7 +135,7 @@ CONFIG_START_MONTH=12
+ CONFIG_START_YEAR=2011
+ CONFIG_SYSTEM_CLE=y
+ CONFIG_SYSTEM_NSH=y
+-CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
++#CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
+ CONFIG_UART1_RXBUFSIZE=1024
+ CONFIG_UART1_SERIAL_CONSOLE=y
+ CONFIG_UART1_TXBUFSIZE=1024
 @@ -151,3 +152,239 @@ CONFIG_USBMSC_VENDORID=0x054c
  CONFIG_USBMSC_VENDORSTR="Sony"
  CONFIG_USERMAIN_STACKSIZE=8192
